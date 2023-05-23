@@ -1,0 +1,41 @@
+/*
+* Title  : Test Cases script for POST Request Method to verify Response Status, Header and Body
+* Author : Maroti Pawar
+*/
+const 
+    {
+       name,
+       description,
+     } 
+        = pm.response.json();
+const 
+    [
+        server,
+        date, 
+        contentType
+        ]
+        =pm.response.headers.map(
+            (index)=>{
+                    return{...index};
+                });
+
+const test = pm.test;
+const check = pm.expect;
+
+const testStatus =(status)=>(()=>{pm.response.to.have.status(status)});
+const testResponsTime = (time)=>( ()=>check(pm.response.responseTime).to.have.below(time));
+
+const testDesc = (desc)=>(check(description).to.have.contain(desc));
+
+
+/* Test Case for Response Status code, status line and time */
+test("Status",testStatus(200));
+test( "Verify Status Line 200 OK",testStatus(200,"Created"));
+test("Verify Response Time", testResponsTime(500));
+         
+
+
+/* Test Case for Response Body */
+
+test("Verify description", testDesc("updated"));
+
