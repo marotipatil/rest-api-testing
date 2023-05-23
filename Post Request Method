@@ -1,0 +1,65 @@
+/*
+* Title  : Test Cases script for POST Request Method to verify Response Status, Header and Body
+* Author : Maroti Pawar
+*/
+const 
+    {
+        name,
+        full_name,
+        private,
+        owner,
+        html_url,
+        description,
+        has_issues,
+        has_wiki,
+        has_pages, 
+        organization
+        } 
+        = pm.response.json();
+const 
+    [
+        server,
+        date, 
+        contentType
+        ]
+        =pm.response.headers.map(
+            (index)=>{
+                    return{...index};
+                });
+
+const test = pm.test;
+const check = pm.expect;
+pm.environment.set("repo", name);
+const testStatus =(status)=>(()=>{pm.response.to.have.status(status)});
+const testResponsTime = (time)=>( ()=>check(pm.response.responseTime).to.have.below(time));
+const testContentType = (content)=>(()=>check(contentType.value).to.equal(content));
+const testServer = (serverName)=>(()=> check(server.value).to.equal(serverName));
+const testRepo = (repoName)=>(check(repoName).to.equal(repoName));
+const testDesc = (desc)=>(check(description).to.have.contain(desc));
+const isIssue = (boolean)=>( check(has_issues).to.eq(boolean))
+const isWikki = (boolean)=>(check(has_wiki).to.eq(boolean));
+const isPage = (boolean)=>( check(has_pages).to.eq(boolean));
+const testFullName = (fullName)=>( check(full_name).to.equals(fullName));
+const testOwner = (ownerName)=>( check(owner.login).to.equal(ownerName));
+const testUrl = (url)=>(check(organization.url).to.equal(url));
+
+/* Test Case for Response Status code, status line and time */
+test("Status",testStatus(201));
+test( "Verify Status Line 200 OK",testStatus(201,"Created"));
+test("Verify Response Time", testResponsTime(1600));
+         
+
+/* Test case for Response header */
+test("Verify Content Type application/json;charset=utf-8",testContentType("application/json; charset=utf-8"));
+test("Verify server", testServer("GitHub.com"));
+
+/* Test Case for Response Body */
+test("Verify Repository Name", testRepo(pm.environment.get("repo")));
+test("Verify description", testDesc("testing"));
+test("Verify has issues", isIssue(true));
+test("Verify has wikki", isWikki(true));
+test("Verify has NO Page", isPage(false));
+test("Verify Full Name", testFullName("marotipatil/"+pm.environment.get("repo")));
+test("Verify owner", testOwner("marotipatil"));
+test("Verify organization URL", testUrl("https://api.github.com/users/marotipatil"));
+
